@@ -3,15 +3,14 @@ import React, { useEffect } from 'react';
 import ContactForm from './contactForm/ContactForm';
 import FilterName from './FilterName/FilterName';
 import ContactList from './ContactList/ContactList';
-import { useSelector } from 'react-redux';
-import { startContact } from 'redux/reducer/contactsSlice';
-import { useDispatch } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 
-//https://655e5e029f1e1093c59afcb5.mockapi.io/contacts/:endpoint
+import { fetchContacts } from 'components/operations/operations';
+
 const App = () => {
   const filter = useSelector(state => state.filter);
 
-  const contacts = useSelector(state => state.contacts);
+  const { contacts, isLoading, error } = useSelector(state => state.contacts);
 
   const dispatch = useDispatch();
 
@@ -23,18 +22,12 @@ const App = () => {
 
   useEffect(
     () => {
-      const savedSettings = localStorage.getItem('contacts');
-      const parsedSettings = JSON.parse(savedSettings);
-
-      if (parsedSettings !== null) dispatch(startContact(parsedSettings));
+      dispatch(fetchContacts());
     }, // eslint-disable-next-line
     []
   );
-
-  useEffect(() => {
-    localStorage.setItem('contacts', JSON.stringify(contacts));
-  }, [contacts]);
-
+  if (error) return <p>{error}</p>;
+  if (isLoading) return <p>Loading...</p>;
   return (
     <div
       style={{
@@ -51,6 +44,7 @@ const App = () => {
         <ContactForm />
         <h2>Contacts</h2>
         <FilterName />
+        
         <ContactList getFilterName={getFilterName} />
       </div>
     </div>
